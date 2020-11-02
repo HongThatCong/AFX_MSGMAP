@@ -1,8 +1,9 @@
 ﻿# pylint: disable=C0301,C0103,C0111
 
 # ==============================================================================
+#
 # AfxMSGMap plugin for IDA
-# Copyright (c) 2018
+# Copyright (c) 2018 - 2020
 # Snow 85703533
 # Port to IDA 7x by HTC - VinCSS (a member of Vingroup)
 # All rights reserved.
@@ -1480,53 +1481,237 @@ MSG_TABLES = [
     (0x2138, "OCM_CTLCOLORSTATIC"),
     (0x2210, "OCM_PARENTNOTIFY"),
     (0x8000, "WM_APP"),
-    (0xC002, "STDOLEVERB"),   # HTC - afxole.h
     (0xCCCD, "WM_RASDIALEVENT"),
+    (0xBC00, "WM_REFLECT_BASE"),
+    (0xC000, "WM_DRAGLIST"),
 ]
+
+# afxmsg_.h
+# Naming scheme:
+# <signature> -> AfxSig_<ReturnType>_<WPARAMType>_<LPARAMType>
+# <ReturnType> -> b (BOOL)
+#                 h (HANDLE)
+#                 v (void)
+#                 i (int)
+#                 l (LRESULT)
+# <WPARAMType> ->
+# Naming scheme:
+# b - BOOL
+# D - CDC*
+# W - CWnd*
+# w - UINT
+# h - handle
+# i - int
+# s - LPTSTR
+# v - void
+# l - LPARAM
+# M - CMenu*
+# p - CPoint
+# POS - WINDOWPOS*
+# CALC - NCCALCSIZE_PARAMS*
+# NMHDR - NMHDR*
+# HELPINFO - HELPINFO*
+# SIZING - LPRECT
+# cmdui - CCmdUI*
+# CDS - COPYDATASTRUCT*
+# s - short
+# by - byte
+
+AfxSig = [
+    ("AfxSig_end", "Marks end of message map"), # = 0
+    ("AfxSig_b_D_v", "BOOL (CDC*)"),
+    ("AfxSig_b_b_v", "BOOL (BOOL)"),
+    ("AfxSig_b_u_v", "BOOL (UINT)"),
+    ("AfxSig_b_h_v", "BOOL (HANDLE)"),
+    ("AfxSig_b_W_uu", "BOOL (CWnd*, UINT, UINT)"),
+    ("AfxSig_b_W_COPYDATASTRUCT", "BOOL (CWnd*, COPYDATASTRUCT*)"),
+    ("AfxSig_b_v_HELPINFO", "BOOL (LPHELPINFO)"),
+    ("AfxSig_CTLCOLOR", "HBRUSH (CDC*, CWnd*, UINT)"),
+    ("AfxSig_CTLCOLOR_REFLECT", "HBRUSH (CDC*, UINT)"),
+    ("AfxSig_i_u_W_u", "int (UINT, CWnd*, UINT)"),
+    ("AfxSig_i_uu_v", "int (UINT, UINT)"),
+    ("AfxSig_i_W_uu", "int (CWnd*, UINT, UINT)"),
+    ("AfxSig_i_v_s", "int (LPTSTR)"),
+    ("AfxSig_l_w_l", "LRESULT (WPARAM, LPARAM)"),
+    ("AfxSig_l_uu_M", "LRESULT (UINT, UINT, CMenu*)"),
+    ("AfxSig_v_b_h", "void (BOOL, HANDLE)"),
+    ("AfxSig_v_h_v", "void (HANDLE)"),
+    ("AfxSig_v_h_h", "void (HANDLE, HANDLE)"),
+    ("AfxSig_v_v_v", "void ()"),
+    ("AfxSig_v_u_v", "void (UINT)"),
+    ("AfxSig_v_u_u", "void (UINT, UINT)"),
+    ("AfxSig_v_uu_v", "void (UINT, UINT)"),
+    ("AfxSig_v_v_ii", "void (int, int)"),
+    ("AfxSig_v_u_uu", "void (UINT, UINT, UINT)"),
+    ("AfxSig_v_u_ii", "void (UINT, int, int)"),
+    ("AfxSig_v_u_W", "void (UINT, CWnd*)"),
+    ("AfxSig_i_u_v", "int (UINT)"),
+    ("AfxSig_u_u_v", "UINT (UINT)"),
+    ("AfxSig_b_v_v", "BOOL ()"),
+    ("AfxSig_v_w_l", "void (WPARAM, LPARAM)"),
+    ("AfxSig_MDIACTIVATE", "void (BOOL, CWnd*, CWnd*)"),
+    ("AfxSig_v_D_v", "void (CDC*)"),
+    ("AfxSig_v_M_v", "void (CMenu*)"),
+    ("AfxSig_v_M_ub", "void (CMenu*, UINT, BOOL)"),
+    ("AfxSig_v_W_v", "void (CWnd*)"),
+    ("AfxSig_v_v_W", "void (CWnd*)"),
+    ("AfxSig_v_W_uu", "void (CWnd*, UINT, UINT)"),
+    ("AfxSig_v_W_p", "void (CWnd*, CPoint)"),
+    ("AfxSig_v_W_h", "void (CWnd*, HANDLE)"),
+    ("AfxSig_C_v_v", "HCURSOR ()"),
+    ("AfxSig_ACTIVATE", "void (UINT, CWnd*, BOOL)"),
+    ("AfxSig_SCROLL", "void (UINT, UINT, CWnd*)"),
+    ("AfxSig_SCROLL_REFLECT", "void (UINT, UINT)"),
+    ("AfxSig_v_v_s", "void (LPTSTR)"),
+    ("AfxSig_v_u_cs", "void (UINT, LPCTSTR)"),
+    ("AfxSig_OWNERDRAW", "void (int, LPTSTR) force return TRUE"),
+    ("AfxSig_i_i_s", "int (int, LPTSTR)"),
+    ("AfxSig_u_v_p", "UINT (CPoint)"),
+    ("AfxSig_u_v_v", "UINT ()"),
+    ("AfxSig_v_b_NCCALCSIZEPARAMS", "void (BOOL, NCCALCSIZE_PARAMS*)"),
+    ("AfxSig_v_v_WINDOWPOS", "void (WINDOWPOS*)"),
+    ("AfxSig_v_uu_M", "void (UINT, UINT, HMENU)"),
+    ("AfxSig_v_u_p", "void (UINT, CPoint)"),
+    ("AfxSig_SIZING", "void (UINT, LPRECT)"),
+    ("AfxSig_MOUSEWHEEL", "BOOL (UINT, short, CPoint)"),
+    ("AfxSig_MOUSEHWHEEL", "void (UINT, short, CPoint)"),
+    ("AfxSigCmd_v", "void ()"),
+    ("AfxSigCmd_b", "BOOL ()"),
+    ("AfxSigCmd_RANGE", "void (UINT)"),
+    ("AfxSigCmd_EX", "BOOL (UINT)"),
+    ("AfxSigNotify_v", "void (NMHDR*, LRESULT*)"),
+    ("AfxSigNotify_b", "BOOL (NMHDR*, LRESULT*)"),
+    ("AfxSigNotify_RANGE", "void (UINT, NMHDR*, LRESULT*)"),
+    ("AfxSigNotify_EX", "BOOL (UINT, NMHDR*, LRESULT*)"),
+    ("AfxSigCmdUI", "void (CCmdUI*)"),
+    ("AfxSigCmdUI_RANGE", "void (CCmdUI*, UINT)"),
+    ("AfxSigCmd_v_pv", "void (void*)"),
+    ("AfxSigCmd_b_pv", "BOOL (void*)"),
+    ("AfxSig_l", "LRESULT ()"),
+    ("AfxSig_l_p", "LRESULT (CPOINT)"),
+    ("AfxSig_u_W_u", "UINT (CWnd*, UINT)"),
+    ("AfxSig_v_u_M", "void (UINT, CMenu* )"),
+    ("AfxSig_u_u_M", "UINT (UINT, CMenu* )"),
+    ("AfxSig_u_v_MENUGETOBJECTINFO", "UINT (MENUGETOBJECTINFO*)"),
+    ("AfxSig_v_M_u", "void (CMenu*, UINT)"),
+    ("AfxSig_v_u_LPMDINEXTMENU", "void (UINT, LPMDINEXTMENU)"),
+    ("AfxSig_APPCOMMAND", "void (CWnd*, UINT, UINT, UINT)"),
+    ("AfxSig_RAWINPUT", "void (UINT, HRAWINPUT)"),
+    ("AfxSig_u_u_u", "UINT (UINT, UINT)"),
+    ("AfxSig_MOUSE_XBUTTON", "void (UINT, UINT, CPoint)"),
+    ("AfxSig_MOUSE_NCXBUTTON", "void (short, UINT, CPoint)"),
+    ("AfxSig_INPUTLANGCHANGE", "void (BYTE, UINT)"),
+    ("AfxSig_v_u_hkl", "void (UINT, HKL)"),
+    ("AfxSig_INPUTDEVICECHANGE", "void (unsigned short)"),
+]
+
+IS64 = idc.__EA64__
+
+# AFX_MSGMAPs names
+S_MSGMAP = "AFX_MSGMAP"
+S_MSGMAP_ENTRY = "AFX_MSGMAP_ENTRY"
+
+# AFX_OLECMDMAPs
+S_OLECMDMAP = "AFX_OLECMDMAP"
+S_OLECMDMAP_ENTRY = "AFX_OLECMDMAP_ENTRY"
+
+# AFX_CONNECTIONMAPs
+S_CONNECTIONMAP = "AFX_CONNECTIONMAP"
+S_CONNECTIONMAP_ENTRY = "AFX_CONNECTIONMAP_ENTRY"
+
+# AFX_DISPMAPs
+S_DISPMAP = "AFX_DISPMAP"
+S_DISPMAP_ENTRY = "AFX_DISPMAP_ENTRY"
+
+# AFX_EVENTSINKMAPs
+S_EVENTSINKMAP = "AFX_EVENTSINKMAP"
+S_EVENTSINKMAP_ENTRY = "AFX_EVENTSINKMAP_ENTRY"
+
+# AFX_INTERFACEMAPs
+S_INTERFACEMAP = "AFX_INTERFACEMAP"
+S_INTERFACEMAP_ENTRY = "AFX_INTERFACEMAP_ENTRY"
+
+# enum names
+S_WM_MESSAGES = "WM_MESSAGES"
+S_CN_ENUM = "CN_ENUM"   # CCmdTarget control notification code
+S_AFXSIG = "AfxSig"
+S_DISPMAP_FLAGS = "AFX_DISPMAP_FLAGS"
+
+# CRuntimeClass names
+S_CRuntimeClass = "CRuntimeClass"
+S_CRuntimeClass_v7 = "CRuntimeClass_v7"
+# public: static struct CRuntimeClass const 'CClassName'::class'CClassName'
+S_CRTC_Name = "?class%s@%s@@2UCRuntimeClass@@B"
+# public: virtual struct CRuntimeClass * 'CClassName'::GetRuntimeClass(void)const
+S_CRTC_GetRTC = "?GetRuntimeClass@%s@@UEBAPEAUCRuntimeClass@@XZ"
+# protected: static struct CRuntimeClass * 'CClassName'::_GetBaseClass(void)
+S_CRTC_GetBaseClass = "?_GetBaseClass@%s@@KAPEAUCRuntimeClass@@XZ"
+# public: static class CObject * 'CClassName'::CreateObject(void)
+S_CRTC_CreateObject = "?CreateObject@%s@@SAPEAVCObject@@XZ"
 
 MENU_PATH = "Search/AFX_MSGMAP/"
 POPUP_PATH = "AFX_MSGMAP/"
 
 # Utility functions
 
-def is_MFC_binary():
-    """
-    MFC file is an PE file, use VC++ compiler and have "CObject" string
+class Utils(object):
+    @staticmethod
+    def is_MFC_binary():
+        """
+        MFC file is an PE file, use VC++ compiler and have "CObject" string
 
-    Return:
-        -3: Not in PC 32bit or 64bit mode
-        -2: Not a COFF, PE, OMF, ZIP, OMF LIB, AR file type
-        -1: Not use VC++ compiler
-         0: Not used MFC
-         1: Used MFC
-    """
-    lflag = idc.get_inf_attr(idc.INF_LFLAGS)
-    if lflag & idc.LFLG_PC_FLAT == 0:
-        return -3
+        Return:
+            -3: Not in PC 32bit or 64bit mode
+            -2: Not a COFF, PE, OMF, ZIP, OMF LIB, AR file type
+            -1: Not use VC++ compiler
+             0: Not used MFC
+             1: Used MFC
+        """
+        if idaapi.ph_get_id() != idaapi.PLFM_386:
+            return -3
 
-    filetype = idc.get_inf_attr(idc.INF_FILETYPE)
-    if filetype not in (idc.FT_COFF, idc.FT_PE, idc.FT_OMF, idc.FT_ZIP, idc.FT_OMFLIB, idc.FT_AR):
-        # Not a PE, COFF hay LIB binary
-        return -2
+        filetype = idc.get_inf_attr(idc.INF_FILETYPE)
+        if filetype not in (idc.FT_COFF, idc.FT_PE, idc.FT_OMF, idc.FT_ZIP, idc.FT_OMFLIB, idc.FT_AR):
+            # Not a PE, COFF hay LIB binary
+            return -2
 
-    compiler = idc.get_inf_attr(idc.INF_COMPILER)
-    if compiler & idc.COMP_MASK != idc.COMP_MS:
-        # Not a Visual C++ binary
-        return -1
+        compiler = idc.get_inf_attr(idc.INF_COMPILER)
+        if compiler & idc.COMP_MASK != idc.COMP_MS:
+            # Not a Visual C++ binary
+            return -1
 
-    if idc.find_binary(0, idc.SEARCH_CASE | idc.SEARCH_DOWN, '"CObject"') == idc.BADADDR:
-        return 0
+        if idc.find_binary(0, idc.SEARCH_CASE | idc.SEARCH_DOWN, '"CObject"') == idc.BADADDR:
+            return 0
 
-    return 1
+        return 1
 
-def set_bookmark(addr, description):
-    """ Add bookmark with description at addr """
-    for slot in range(ida_moves.MAX_MARK_SLOT):
-        ea = idc.get_bookmark(slot)
-        if ea == idc.BADADDR:
-            idc.put_bookmark(addr, 0, 0, 0, slot, description)
-            return
+    @staticmethod
+    def set_bookmark(addr, description):
+        """ Add bookmark with description at addr """
+        for slot in range(ida_moves.MAX_MARK_SLOT):
+            ea = idc.get_bookmark(slot)
+            if ea == idc.BADADDR:
+                idc.put_bookmark(addr, 0, 0, 0, slot, description)
+                return
 
+    @staticmethod
+    def force_add_struct(name):
+        sid = idc.get_struc_id(name)
+        if sid != idc.BADADDR:
+            # struct already existed
+            sptr = idaapi.get_struc(sid)
+            if sptr:
+                idaapi.del_struc_members(sptr, 0, idc.BADADDR)
+        else:
+            sid = idc.add_struc(idc.BADADDR, name, 0)
+        return sid
+
+    @staticmethod
+    def force_add_enum(name, flags):
+        eid = idc.get_enum(name)
+        if eid == idc.BADADDR:
+            eid = idc.add_enum(idc.BADADDR, name, flags)
+        return eid
 
 class AFXMSGMAPSearchResultChooser(idaapi.Choose):
     def __init__(self, title, items, flags=0, width=None, height=None, embedded=False):
@@ -1563,26 +1748,21 @@ class AFXMSGMAPSearchResultChooser(idaapi.Choose):
         return self.Show() >= 0
 
 
-class AfxMSGMap(object):
-
+class AFXStructs(object):
     def __init__(self):
-        self.cmin = 0
-        self.cmax = 0
-        self.rmin = 0
-        self.rmax = 0
-        self.dmin = 0
-        self.dmax = 0
+        self.min_ea = idc.get_inf_attr(idc.INF_MIN_EA)
+        self.max_ea = idc.get_inf_attr(idc.INF_MAX_EA)
+
         self.msg_enum = 0
-        self.MSGStructSize = 24
-        self.USize = 4
-        if idc.__EA64__:
-            self.MSGStructSize = 32
-            self.USize = 8
+        self.isDll = (idc.get_inf_attr(idc.INF_LFLAGS) & idc.LFLG_IS_DLL) != 0
+        self.ptrSize = 8 if IS64 else 4
+
+        self.MSGStructSize = 32 if IS64 else 32
 
     @staticmethod
     def mt_rva():
         ri = ida_nalt.refinfo_t()
-        if idc.__EA64__:
+        if IS64:
             ri.flags = idc.REF_OFF64
         else:
             ri.flags = idc.REF_OFF32
@@ -1601,48 +1781,189 @@ class AfxMSGMap(object):
         return mt
 
     def add_AFX_structs(self):
-        name = "AFX_MSGMAP"
-        idx = idaapi.get_struc_id(name)
-        if idx == idc.BADADDR:
-            idx = idaapi.add_struc(idc.BADADDR, name)
+        ff_size_t = idc.FF_DATA | (idc.FF_QWORD if IS64 else idc.FF_DWORD)
+        rt = idc.REF_OFF64 if IS64 else idc.REF_OFF32
+        ptrFlag = idc.FF_0OFF | ff_size_t
 
-            stru = idaapi.get_struc(idx)
-            if idc.__EA64__:
-                idaapi.add_struc_member(stru, "pfnGetBaseMap", 0, idc.FF_DATA | idc.FF_QWORD | idc.FF_0OFF, self.mt_rva(), 8)
-                idaapi.add_struc_member(stru, "lpEntries", 8, idc.FF_DATA | idc.FF_QWORD | idc.FF_0OFF, self.mt_rva(), 8)
-            else:
-                idaapi.add_struc_member(stru, "pfnGetBaseMap", 0, idc.FF_DATA | idc.FF_DWORD | idc.FF_0OFF, self.mt_rva(), 4)
-                idaapi.add_struc_member(stru, "lpEntries", 4, idc.FF_DATA | idc.FF_DWORD | idc.FF_0OFF, self.mt_rva(), 4)
+        # Add CObject and CCmdTarget root struct
+        #
+        sid = Utils.force_add_struct("CObject")
+        idc.add_struc_member(sid, "vfptr", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
 
-        name = "AFX_MSGMAP_ENTRY"
-        idx = idaapi.get_struc_id(name)
-        if idx == idc.BADADDR:
-            idx = idaapi.add_struc(idc.BADADDR, name)
+        sid = Utils.force_add_struct("CCmdTarget")
+        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT,
+                             idc.get_struc_id("CObject"), self.ptrSize)  # sizeof(CObject) = sizeof(CObject::vfptr)
 
-            stru = idaapi.get_struc(idx)
-            idaapi.add_struc_member(stru, "nMessage", 0, idc.FF_DATA | idc.FF_DWORD, None, 4)
-            idaapi.add_struc_member(stru, "nCode", 4, idc.FF_DATA | idc.FF_DWORD, None, 4)
-            idaapi.add_struc_member(stru, "nID", 8, idc.FF_DATA | idc.FF_DWORD, None, 4)
-            idaapi.add_struc_member(stru, "nLastID", 12, idc.FF_DATA | idc.FF_DWORD, None, 4)
+        # Add xxx_xxxMAP_ENTRY before xxx_xxxMAP for SetType
 
-            if idc.__EA64__:
-                idaapi.add_struc_member(stru, "nSig", 16, idc.FF_DATA | idc.FF_QWORD, None, 8)
-                idaapi.add_struc_member(stru, "pfn", 24, idc.FF_DATA | idc.FF_QWORD | idc.FF_0OFF, self.mt_rva(), 8)
-            else:
-                idaapi.add_struc_member(stru, "nSig", 16, idc.FF_DATA | idc.FF_DWORD, None, 4)
-                idaapi.add_struc_member(stru, "pfn", 20, idc.FF_DATA | idc.FF_DWORD | idc.FF_0OFF, self.mt_rva(), 4)
+        # AFX_MSGMAPs
+        sid = Utils.force_add_struct(S_MSGMAP_ENTRY)
+        idc.add_struc_member(sid, "nMessage", 0, idc.FF_DATA | idc.FF_DWORD | idc.FF_0ENUM,
+                             idc.get_enum(S_WM_MESSAGES), 4)
+        idc.add_struc_member(sid, "nCode", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "nID", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "nLastID", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "nSig", -1, ff_size_t | idc.FF_0ENUM,
+                             idc.get_enum(S_AFXSIG), self.ptrSize)
+        idc.add_struc_member(sid, "pfn", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.SetType(idc.get_member_id(sid, 4 * 4 + self.ptrSize), "void (__thiscall *)(CCmdTarget *this)")   # pfn type
 
-        return 0
+        sid = Utils.force_add_struct(S_MSGMAP)
+        idc.add_struc_member(sid, "pfnGetBaseMap" if self.isDll else "pBaseMap", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpEntries", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.SetType(idc.get_member_id(sid, 0x0), "const AFX_MSGMAP *(__stdcall *)()" if self.isDll else "const AFX_MSGMAP *")
+        idc.SetType(idc.get_member_id(sid, self.ptrSize), "const AFX_MSGMAP_ENTRY *")
+
+        # AFX_OLECMDMAPs
+        sid = Utils.force_add_struct(S_OLECMDMAP_ENTRY)
+        idc.add_struc_member(sid, "pguid", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "cmdID", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "nID", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.SetType(idc.get_member_id(sid, 0), "const GUID *")
+
+        sid = Utils.force_add_struct(S_OLECMDMAP)
+        idc.add_struc_member(sid, "pfnGetBaseMap" if self.isDll else "pBaseMap", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpEntries", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.SetType(idc.get_member_id(sid, 0x0), "const AFX_OLECMDMAP *(__stdcall *)()" if self.isDll else "const AFX_OLECMDMAP *")
+        idc.SetType(idc.get_member_id(sid, self.ptrSize), "const AFX_OLECMDMAP_ENTRY *")
+
+        # AFX_CONNECTIONMAPs
+        sid = Utils.force_add_struct(S_CONNECTIONMAP_ENTRY)
+        idc.add_struc_member(sid, "piid", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "nOffset", -1, ff_size_t, -1, self.ptrSize)
+
+        sid = Utils.force_add_struct(S_CONNECTIONMAP)
+        idc.add_struc_member(sid, "pfnGetBaseMap" if self.isDll else "pBaseMap", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpEntries", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.SetType(idc.get_member_id(sid, 0x0), "const AFX_CONNECTIONMAP *(__stdcall *)()" if self.isDll else "const AFX_CONNECTIONMAP *")
+        idc.SetType(idc.get_member_id(sid, self.ptrSize), "const AFX_CONNECTIONMAP_ENTRY *")
+
+        # AFX_DISPMAPs
+        sid = Utils.force_add_struct(S_DISPMAP_ENTRY)
+        # because padding, all field ofs and size align on ptrSize
+        idc.add_struc_member(sid, "lpszName", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lDispID", 1 * self.ptrSize, ff_size_t, -1, self.ptrSize)
+        idc.add_struc_member(sid, "lpszParams", 2 * self.ptrSize, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "vt", 3 * self.ptrSize, ff_size_t, -1, self.ptrSize)    # padding on x64
+        idc.add_struc_member(sid, "pfn", 4 * self.ptrSize, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "pfnSet", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "nPropOffset", -1, ff_size_t, -1, self.ptrSize)
+        idc.add_struc_member(sid, "flags", -1, ff_size_t | idc.FF_0ENUM,
+                             idc.get_enum(S_DISPMAP_FLAGS), self.ptrSize)   # padding on x64
+        idc.SetType(idc.get_member_id(sid, 2 * 4 + 2 * self.ptrSize), "void (__thiscall (CCmdTarget *this)")    # pfn type
+        idc.SetType(idc.get_member_id(sid, 2 * 4 + 3 * self.ptrSize), "void (__thiscall (CCmdTarget *this)")    # pfnSet type
+
+        sid = Utils.force_add_struct(S_DISPMAP)
+        idc.add_struc_member(sid, "pfnGetBaseMap" if self.isDll else "pBaseMap", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpEntries", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpEntryCount", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpStockPropMask", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.SetType(idc.get_member_id(sid, 0x0), "const AFX_DISPMAP *(__stdcall *)()" if self.isDll else "const AFX_DISPMAP *")
+        idc.SetType(idc.get_member_id(sid, self.ptrSize), "const AFX_DISPMAP_ENTRY *")
+        idc.SetType(idc.get_member_id(sid, 2 * self.ptrSize), "UINT *")
+        idc.SetType(idc.get_member_id(sid, 3 * self.ptrSize), "DWORD *")
+
+        # AFX_EVENTSINKMAPs
+        sid = Utils.force_add_struct(S_EVENTSINKMAP_ENTRY)
+        idc.add_struc_member(sid, "dispEntry", 0, idc.FF_DATA | idc.FF_STRUCT,
+                             idc.get_struc_id(S_DISPMAP_ENTRY), 8 * self.ptrSize)
+        idc.add_struc_member(sid, "nCtrlIDFirst", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "nCtrlIDLast", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+
+        sid = Utils.force_add_struct(S_EVENTSINKMAP)
+        idc.add_struc_member(sid, "pfnGetBaseMap" if self.isDll else "pBaseMap", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpEntries", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpEntryCount", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.SetType(idc.get_member_id(sid, 0x0), "const AFX_EVENTSINKMAP *(__stdcall *)()" if self.isDll else "const AFX_EVENTSINKMAP *")
+        idc.SetType(idc.get_member_id(sid, self.ptrSize), "const AFX_EVENTSINKMAP_ENTRY *")
+        idc.SetType(idc.get_member_id(sid, 2 * self.ptrSize), "UINT *")
+
+        # AFX_INTERFACEMAPs
+        sid = Utils.force_add_struct(S_INTERFACEMAP_ENTRY)
+        idc.add_struc_member(sid, "piid", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "nOffset", -1, ff_size_t, -1, self.ptrSize)
+
+        sid = Utils.force_add_struct(S_INTERFACEMAP)
+        idc.add_struc_member(sid, "pfnGetBaseMap" if self.isDll else "pBaseMap", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "lpEntries", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.SetType(idc.get_member_id(sid, 0x0), "const AFX_INTERFACEMAP *(__stdcall *)()" if self.isDll else "const AFX_INTERFACEMAP *")
+        idc.SetType(idc.get_member_id(sid, self.ptrSize), "const AFX_INTERFACEMAP_ENTRY *")
+
+        # CRuntimeClass
+        sid = Utils.force_add_struct(S_CRuntimeClass)
+        idc.add_struc_member(sid, "m_lpszClassName", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "m_nObjectSize", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "m_wSchema", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "m_pfnCreateObject", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "m_pfnGetBaseClass" if self.isDll else "m_pBaseClass",
+                             -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "m_pNextClass", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+
+        idc.SetType(idc.get_member_id(sid, self.ptrSize + 8), "CObject *(__stdcall *)()")   # m_pfnCreateObject
+        idc.SetType(idc.get_member_id(sid, 2 * self.ptrSize + 8),    # m_pfnGetBaseClass or m_pBaseClass
+                    "CRuntimeClass *(__stdcall *)()" if self.isDll else "CRuntimeClass *")
+        idc.SetType(idc.get_member_id(sid, 3 * self.ptrSize + 8), "CRuntimeClass *") # m_pNextClass
+
+        # CRuntimeClass_v7
+        # HTC - add m_pClassInit field, it is the last field in CRuntimeClass in MFC >= v7
+        sid = Utils.force_add_struct(S_CRuntimeClass_v7)
+        idc.add_struc_member(sid, "CRuntimeClass", 0, idc.FF_DATA | idc.FF_STRUCT,
+                             idc.get_struc_id(S_CRuntimeClass), 5 * self.ptrSize)
+        idc.add_struc_member(sid, "m_pClassInit", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
+
+        # Some internal CStrings class in ATL/MFC
+        sid = Utils.force_add_struct("ATL::IAtlStringMgr")
+        idc.add_struc_member(sid, "vfptr", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+
+        sid = Utils.force_add_struct("ATL::CStringData")
+        idc.add_struc_member(sid, "pStringMgr", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+        idc.add_struc_member(sid, "nDataLength", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "nAllocLength", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.add_struc_member(sid, "nRefs", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
+        idc.SetType(idc.get_member_id(sid, 0), "ATL::IAtlStringMgr *") # m_pNextClass
+
+        sid = Utils.force_add_struct("ATL::CNilStringData")
+        idc.add_struc_member(sid, "baseclass", 0, 0, idc.FF_DATA | idc.FF_STRUCT,
+                             idc.get_struc_id("ATL::CStringData"), self.ptrSize + 3 * 4)
+        idc.add_struc_member(sid, "achNil", -1, idc.FF_DATA | idc.FF_WORD, -1, 4)
+
+        sid = Utils.force_add_struct("CAfxStringMgr")
+        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT,
+                             idc.get_struc_id("ATL::IAtlStringMgr"), self.ptrSize)
+        idc.add_struc_member(sid, "m_nil", -1, idc.FF_DATA | idc.FF_STRUCT,
+                             idc.get_struc_id("ATL::CNilStringData"), self.ptrSize + 4 * 4)
+
+        sid = Utils.force_add_struct("ATL::CSimpleString")
+        idc.add_struc_member(sid, "m_pszData", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
+
+        sid = Utils.force_add_struct("ATL::CString")
+        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT,
+                             idc.get_struc_id("ATL::CSimpleString"), self.ptrSize)
+
+        return True
 
     def add_WM_MESSAGES_enum(self):
-        name = "WM_MESSAGES"
-        idx = idc.get_enum(name)
-        if idx == idc.BADADDR:
-            idx = idc.add_enum(idc.BADADDR, name, idaapi.hex_flag())
-            for msg in MSG_TABLES:
-                msg_id, msg_name = msg
-                idc.add_enum_member(idx, msg_name, msg_id, idc.BADADDR)
-            print("WM_MESSAGES enum added")
+        eid = Utils.force_add_enum(S_WM_MESSAGES, idaapi.hex_flag())
+        for msg in MSG_TABLES:
+            msg_id, msg_name = msg
+            idc.add_enum_member(eid, msg_name, msg_id, idc.BADADDR)
+
+    def add_AFX_enums(self):
+        eid = Utils.force_add_enum(S_CN_ENUM, idc.FF_0NUMH | idaapi.FF_SIGN)
+        idc.add_enum_member(eid, "CN_COMMAND", 0x0, -1)
+        idc.add_enum_member(eid, "CN_OLE_UNREGISTER", 0xFFFFFFFC, -1)
+        idc.add_enum_member(eid, "CN_OLECOMMAND", 0xFFFFFFFD, -1)
+        idc.add_enum_member(eid, "CN_EVENT", 0xFFFFFFFE, -1)
+        idc.add_enum_member(eid, "CN_UPDATE_COMMAND_UI", 0xFFFFFFFF, -1)
+
+        eid = Utils.force_add_enum(S_AFXSIG, idc.FF_0NUMH)
+        for i in range(len(AfxSig)):
+            idc.add_enum_member(eid, AfxSig[i][0], i, -1)
+            idc.set_enum_member_cmt(idc.get_enum_member(eid, i, 0, -1), AfxSig[i][1], 1)
+
+        eid = Utils.force_add_enum(S_DISPMAP_FLAGS, idc.FF_0NUMH)
+        idc.add_enum_member(eid, "afxDispCustom", 0x0, -1)
+        idc.add_enum_member(eid, "afxDispStock", 0x1, -1)
 
     @staticmethod
     def GetMsgName(mid):
@@ -1654,145 +1975,112 @@ class AfxMSGMap(object):
             ret.append("WM_UNKNOWN_0x%X" % mid)
         return ret
 
-    def CheckMSGEntry_attr(self, entry):
+    def Check_MSG_ENTRY(self, entry):
         if entry == idc.BADADDR:
             return 0
-        if idaapi.get_dword(entry + 8) > 65535:
+        # Check nID
+        if idc.get_wide_dword(entry + 8) > 0xFFFF:
             return 0
-        if idaapi.get_dword(entry + 12) > 65535:
+        # Check nLastID
+        if idc.get_wide_dword(entry + 12) > 0xFFFF:
             return 0
         Sig = self.getAword(entry + 16)
-        if Sig > 100:   # Sig
-            if Sig < self.dmin or Sig > self.dmax:  # point message
+        if Sig > len(AfxSig) + 20:  # + 20 for future MFC new AfxSig
+            if not self.min_ea < Sig < self.max_ea:  # point message
                 return 0
 
         return 1
 
     @staticmethod
     def getAword(addr, offset=0):
-        return idaapi.get_qword(addr + offset * 8) if idc.__EA64__ else idaapi.get_dword(addr + offset * 4)
+        return idaapi.get_qword(addr + offset * 8) if IS64 else idc.get_wide_dword(addr + offset * 4)
 
     @staticmethod
     def get_pfn(addr):
-        return idaapi.get_qword(addr + 24) if idc.__EA64__ else idaapi.get_dword(addr + 20)
+        return idaapi.get_qword(addr + 24) if IS64 else idc.get_wide_dword(addr + 20)
 
-    def CheckMSGMAP(self, addr):
-        addrGetThisMessageMap = self.getAword(addr, 0)
-        addrMsgEntry = self.getAword(addr, 1)
-
-        if self.CheckMSGEntry_attr(addrMsgEntry) == 0:
+    def Check_MSGMAP(self, addr, seg_start_ea, seg_end_ea):
+        pBaseMap = self.getAword(addr, 0)
+        if not seg_start_ea < pBaseMap < seg_end_ea:
             return 0
 
-        if self.cmax == 0 or self.rmax == 0 or self.dmax == 0:
-            snum = ida_segment.get_segm_qty()
-
-            for i in range(0, snum):
-                s = ida_segment.getnseg(i)
-                segname = ida_segment.get_segm_name(s)
-
-                if segname == ".text":
-                    self.cmin = s.start_ea
-                    self.cmax = s.end_ea
-
-                if segname == ".rdata":
-                    self.rmin = s.start_ea
-                    self.rmax = s.end_ea
-
-                if segname == ".data":
-                    self.dmin = s.start_ea
-                    self.dmax = s.end_ea
-
-        if self.cmin == self.cmax or self.cmax == 0:
-            return 0
-        if self.rmin == self.rmax or self.rmax == 0:
+        lpEntries = self.getAword(addr, 1)
+        if not seg_start_ea < lpEntries < seg_end_ea:
             return 0
 
-        if addrGetThisMessageMap < self.cmin or addrGetThisMessageMap > self.cmax:
-            #如果是静态连接的, 这里直接指向父消息表地址
-            if addrGetThisMessageMap < self.rmin or addrGetThisMessageMap > self.rmax:
-                return 0
-
-        if addrMsgEntry < self.rmin or addrMsgEntry > self.rmax:
+        if self.Check_MSG_ENTRY(lpEntries) == 0:
             return 0
 
-        if idaapi.get_dword(addrMsgEntry + 0) == 0 and \
-            (idaapi.get_dword(addrMsgEntry + 4) != 0 or
-             idaapi.get_dword(addrMsgEntry + 8) != 0 or
-             idaapi.get_dword(addrMsgEntry + 12) != 0 or
-             self.getAword(addrMsgEntry + 16) != 0 or
-             self.get_pfn(addrMsgEntry) != 0):
+        if idc.get_wide_dword(lpEntries + 0) == 0 and \
+            (idc.get_wide_dword(lpEntries + 4) != 0 or
+             idc.get_wide_dword(lpEntries + 8) != 0 or
+             idc.get_wide_dword(lpEntries + 12) != 0 or
+             self.getAword(lpEntries + 16) != 0 or
+             self.get_pfn(lpEntries) != 0):
             return 0
 
         if idaapi.get_name(addr) == "":
-            if idaapi.get_name(addrGetThisMessageMap) == "":
+            if idaapi.get_name(pBaseMap) == "":
                 return 0
             return -1
 
-        if idaapi.get_name(addrGetThisMessageMap)[0:18] == "?GetThisMessageMap":
+        if idaapi.get_name(pBaseMap)[0:18] == "?GetThisMessageMap":
             return 1
 
-        while addrMsgEntry != idc:
-            if  idaapi.get_dword(addrMsgEntry + 0) == 0 and \
-                idaapi.get_dword(addrMsgEntry + 4) == 0 and \
-                idaapi.get_dword(addrMsgEntry + 8) == 0 and \
-                idaapi.get_dword(addrMsgEntry + 12) == 0 and \
-                self.getAword(addrMsgEntry + 16) == 0 and \
-                self.get_pfn(addrMsgEntry) == 0:
+        while lpEntries < self.max_ea:
+            if  idc.get_wide_dword(lpEntries + 0) == 0 and \
+                idc.get_wide_dword(lpEntries + 4) == 0 and \
+                idc.get_wide_dword(lpEntries + 8) == 0 and \
+                idc.get_wide_dword(lpEntries + 12) == 0 and \
+                self.getAword(lpEntries + 16) == 0 and \
+                self.get_pfn(lpEntries) == 0:
                 return 1
 
-            if self.CheckMSGEntry_attr(addrMsgEntry) == 0:
+            if self.Check_MSG_ENTRY(lpEntries) == 0:
                 return 0
 
-            msgfun_addr = self.get_pfn(addrMsgEntry)
-            if msgfun_addr < self.cmin or msgfun_addr > self.cmax:
+            msgfun_addr = self.get_pfn(lpEntries)
+            if not self.min_ea < msgfun_addr < self.max_ea:
                 return 0
 
-            addrMsgEntry = addrMsgEntry + self.MSGStructSize
+            lpEntries = lpEntries + self.MSGStructSize
 
         return 0
 
     @staticmethod
     def MakeOffset(addr):
-        if idc.__EA64__:
+        if IS64:
             idc.create_data(addr, idc.FF_0OFF | idc.FF_REF | idc.FF_QWORD, 8, idc.BADADDR)
         else:
             idc.create_data(addr, idc.FF_0OFF | idc.FF_REF | idc.FF_DWORD, 4, idc.BADADDR)
 
-    def MakeAfxMSG(self, addr):
-        if idc.__EA64__:
-            self.MakeOffset(addr)
-            self.MakeOffset(addr + 8)
-        else:
-            self.MakeOffset(addr)
-            self.MakeOffset(addr + 4)
-
-    def MakeMSG_ENTRY(self, addr):
+    def Make_MSG_ENTRY(self, addr):
         msgmapSize = 0
-        addrGetThisMessageMap = self.getAword(addr, 0)
-        addrMsgEntry = self.getAword(addr, 1)
+        pBaseMap = self.getAword(addr, 0)
+        lpEntries = self.getAword(addr, 1)
 
-        self.MakeAfxMSG(addr)
-        if idc.get_name(addr) == ("off_%lX" % (addr)) or idc.get_name(addr) == "":
+        idc.create_struct(addr, -1, S_MSGMAP)
+        if idc.get_name(addr) in ("off_%lX" % addr, ""):
             idc.set_name(addr, "msgEntries_%lX" % (addr))
 
-        pEntry = addrMsgEntry
-        while idaapi.get_dword(pEntry) != 0:
-            idc.MakeUnknown(pEntry, self.MSGStructSize, idc.DELIT_SIMPLE)
-            if idc.MakeStructEx(pEntry, self.MSGStructSize, "AFX_MSGMAP_ENTRY") == 0:
-                print("Create AFX_MSGMAP_ENTRY failed at %X" % pEntry)
+        pEntry = lpEntries
+        while idc.get_wide_dword(pEntry) != 0:
+            idc.del_items(pEntry, idc.DELIT_SIMPLE, self.MSGStructSize)
+            if idc.create_struct(pEntry, self.MSGStructSize, S_MSGMAP_ENTRY) == 0:
+                print("Create %s failed at %X" % (S_MSGMAP_ENTRY, pEntry))
                 return 0
 
-            msgNames = self.GetMsgName(idc.Dword(pEntry + 0))
+            msgNames = self.GetMsgName(idc.get_wide_dword(pEntry + 0))
             for msgName in msgNames:
                 str_funcmt = "MSG function: " + msgName + "\n"
-            str_funcmt += "    nMessage: " + ("0x%LX" % idc.Dword(pEntry + 0)) + "\n"
-            str_funcmt += "       nCode: " + str(idc.Dword(pEntry + 4)) + "\n"
-            str_funcmt += "         nID: " + str(idc.Dword(pEntry + 8)) + " - " + str(idc.Dword(pEntry + 12))
+            str_funcmt += "    nMessage: " + ("0x%LX" % idc.get_wide_dword(pEntry + 0)) + "\n"
+            str_funcmt += "       nCode: " + str(idc.get_wide_dword(pEntry + 4)) + "\n"
+            str_funcmt += "         nID: " + str(idc.get_wide_dword(pEntry + 8)) + " - " + str(idc.get_wide_dword(pEntry + 12))
 
             func_startEa = self.get_pfn(pEntry)
             pfn = idaapi.get_func(func_startEa)
             if pfn is None:
-                idc.MakeUnkn(func_startEa, idc.DELIT_SIMPLE)
+                idc.del_items(func_startEa, idc.DELIT_SIMPLE)
                 idaapi.add_func(func_startEa)
                 pfn = idaapi.get_func(func_startEa)
 
@@ -1800,84 +2088,81 @@ class AfxMSGMap(object):
             oldname = idaapi.get_func_name(func_startEa)
             if oldname == "sub_%lX" % (func_startEa):
                 newname = ""
-                if idc.Dword(pEntry + 8) == idc.Dword(pEntry + 12):
-                    if idc.Dword(pEntry + 8) != 0:
-                        newname = "On_%s_%X_%u" % (msgName, func_startEa, idc.Dword(pEntry + 8))
+                if idc.get_wide_dword(pEntry + 8) == idc.get_wide_dword(pEntry + 12):
+                    if idc.get_wide_dword(pEntry + 8) != 0:
+                        newname = "On_%s_%X_%u" % (msgName, func_startEa, idc.get_wide_dword(pEntry + 8))
                     else:
                         newname = "On_%s_%X" % (msgName, func_startEa)
                 else:
-                    newname = "On_%s_%X_%u_to_%u" % (msgName, func_startEa, idc.Dword(pEntry + 8), idc.Dword(pEntry + 12))
+                    newname = "On_%s_%X_%u_to_%u" % (msgName, func_startEa, idc.get_wide_dword(pEntry + 8), idc.get_wide_dword(pEntry + 12))
 
-                idc.MakeName(func_startEa, newname)
+                idc.set_name(func_startEa, newname)
 
             pEntry = pEntry + self.MSGStructSize
 
         # AFX_MSG_END
-        idc.MakeUnknown(pEntry, self.MSGStructSize, idc.DELIT_SIMPLE)
-        idc.MakeStructEx(pEntry, self.MSGStructSize, "AFX_MSGMAP_ENTRY")
-        msgmapSize = pEntry - addrMsgEntry + self.MSGStructSize
+        idc.del_items(pEntry, idc.DELIT_SIMPLE, self.MSGStructSize)
+        idc.create_struct(pEntry, self.MSGStructSize, S_MSGMAP_ENTRY)
+        msgmapSize = pEntry - lpEntries + self.MSGStructSize
         return msgmapSize
 
     # Search All AFX_MSGMAP
     def Search_MSGMAP(self):
-        snum = ida_segment.get_segm_qty()
-
-        for i in range(0, snum):
-            s = ida_segment.getnseg(i)
-            segname = ida_segment.get_segm_name(s)
-
-            if segname == ".text":
-                self.cmin = s.start_ea
-                self.cmax = s.end_ea
-
-            if segname == ".rdata":
-                self.rmin = s.start_ea
-                self.rmax = s.end_ea
-
-        if self.cmin == self.cmax or self.cmax == 0:
-            return 0
-        if self.rmin == self.rmax or self.rmax == 0:
-            return 0
-
-        totalCount = 0
-        parseCount = 0
-        addr = self.rmin
-
         try:
             idaapi.show_wait_box("Search for AFX_MSGMAP...")
+
+            totalCount = 0
+            parseCount = 0
             values = list()
-            while addr != idc.BADADDR:
-                ret = self.CheckMSGMAP(addr)
-                MSGMAPSize = 0
-                if ret > 0:
-                    totalCount += 1
-                    strfind = "Find AFX_MSGMAP at 0x%X" % (addr)
-                    idaapi.replace_wait_box(strfind)
-                    print(strfind)
 
-                    if idc.Name(addr) == "off_%lX" % (addr):
-                        parseCount += 1
+            # Scan AFX_MSGMAP in all .text and .rdata segment
+            snum = ida_segment.get_segm_qty()
+            for i in range(snum):
+                seg_start = 0
+                seg_end = 0
 
-                    MSGMAPSize = self.MakeMSG_ENTRY(addr)
+                s = ida_segment.getnseg(i)
+                segname = ida_segment.get_segm_name(s).lower()
 
-                    value = [
-                        totalCount-1,
-                        addr,
-                        idc.Name(addr),
-                        (MSGMAPSize - self.MSGStructSize) / self.MSGStructSize
-                    ]
-                    values.append(value)
+                if segname in (".text", ".rdata"):
+                    seg_start = s.start_ea
+                    seg_end = s.end_ea
+                else:
+                    continue
 
-                addr += MSGMAPSize + self.USize
+                if seg_start == 0 or seg_end == 0 or seg_start == idc.BADADDR or seg_end == idc.BADADDR:
+                    continue
 
-                MSGMAPSize = 0
-                if addr > self.rmax:
-                    break
+                addr = seg_start
+                while addr < seg_end:
+                    ret = self.Check_MSGMAP(addr, seg_start, seg_end)
+                    MSGMAPSize = 0
+                    if ret > 0:
+                        totalCount += 1
+                        strfind = "Find AFX_MSGMAP at 0x%X" % (addr)
+                        idaapi.replace_wait_box(strfind)
+                        print(strfind)
+
+                        if idc.Name(addr) == "off_%lX" % (addr):
+                            parseCount += 1
+
+                        MSGMAPSize = self.Make_MSG_ENTRY(addr)
+
+                        value = [
+                            totalCount-1,
+                            addr,
+                            idc.Name(addr),
+                            (MSGMAPSize - self.MSGStructSize) / self.MSGStructSize
+                        ]
+                        values.append(value)
+
+                    addr += MSGMAPSize + self.ptrSize
         finally:
             idaapi.hide_wait_box()
 
-        c = AFXMSGMAPSearchResultChooser("Search AFX_MSGMAPs results", values)
-        c.show()
+        if values:
+            c = AFXMSGMAPSearchResultChooser("Search AFX_MSGMAPs results", values)
+            c.show()
         print("===== Search complete, total %lu, new resolution %lu=====\n" % (totalCount, parseCount))
 
 
@@ -1948,14 +2233,12 @@ class AfxMsgMapPlugin_t(idaapi.plugin_t):
     wanted_name = "AFX_MSGMAP"
     wanted_hotkey = ""
 
-
     def __init__(self):
-        self.afxmsgmap = AfxMSGMap()
+        self.afxmsgmap = AFXStructs()
         self.hooks = None
 
     def init(self):
-        ret = is_MFC_binary()
-        print("ret = ", ret)
+        ret = Utils.is_MFC_binary()
 
         if ret >= -1:
             # Alwarys add WM_MESSAGE
@@ -1965,6 +2248,7 @@ class AfxMsgMapPlugin_t(idaapi.plugin_t):
             print("[%s] Not used MFC. Plugin skip" % self.wanted_name)
             return idaapi.PLUGIN_SKIP
 
+        self.afxmsgmap.add_AFX_enums()  # should call before add_AFX_structs
         self.afxmsgmap.add_AFX_structs()
 
         # register popup menu handlers
@@ -2008,9 +2292,11 @@ class AfxMsgMapPlugin_t(idaapi.plugin_t):
 
     # null handler
     def make_msgmap(self):
-        address = idc.get_screen_ea()
-        if self.afxmsgmap.CheckMSGMAP(address) > 0:
-            self.afxmsgmap.MakeMSG_ENTRY(address)
+        ea = idc.get_screen_ea()
+        seg_start = idc.get_segm_start(ea)
+        seg_end = idc.get_segm_end(ea)
+        if self.afxmsgmap.Check_MSGMAP(ea, seg_start, seg_end) > 0:
+            self.afxmsgmap.Make_MSG_ENTRY(ea)
         else:
             print("This is not a AFX_MSGMAP\n")
 
