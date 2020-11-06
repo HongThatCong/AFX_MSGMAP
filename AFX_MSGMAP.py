@@ -19,9 +19,11 @@ import ida_nalt
 import ida_moves
 
 # Constants
+
+WM_USER = 0x400
+WM_APP = 0x8000
+
 MSG_TABLES = [
-    (0x0, "CB_OKAY"),
-    (0x0, "LB_OKAY"),
     (0x0, "WM_NULL"),
     (0x1, "WM_CREATE"),
     (0x2, "WM_DESTROY"),
@@ -508,7 +510,7 @@ MSG_TABLES = [
     (0x35F, "WM_HANDHELDLAST"),
 
     # HTC - AFX internal messages, see in afxpriv.h file
-    (0x360, "WM_QUERYAFXWNDPROC"),
+    (0x360, "WM_QUERYAFXWNDPROC"),  # = WM_AFXFIRST
     (0x361, "WM_SIZEPARENT"),
     (0x362, "WM_SETMESSAGESTRING"),
     (0x363, "WM_IDLEUPDATECMDUI"),
@@ -1481,6 +1483,7 @@ MSG_TABLES = [
     (0x2138, "OCM_CTLCOLORSTATIC"),
     (0x2210, "OCM_PARENTNOTIFY"),
     (0x8000, "WM_APP"),
+    (0xC002, "STDOLEVERB"),  # afxole.h
     (0xCCCD, "WM_RASDIALEVENT"),
     (0xBC00, "WM_REFLECT_BASE"),
     (0xC000, "WM_DRAGLIST"),
@@ -1519,90 +1522,90 @@ MSG_TABLES = [
 
 AfxSig = [
     ("AfxSig_end", "Marks end of message map"), # = 0
-    ("AfxSig_b_D_v", "BOOL (CDC*)"),
-    ("AfxSig_b_b_v", "BOOL (BOOL)"),
-    ("AfxSig_b_u_v", "BOOL (UINT)"),
-    ("AfxSig_b_h_v", "BOOL (HANDLE)"),
-    ("AfxSig_b_W_uu", "BOOL (CWnd*, UINT, UINT)"),
-    ("AfxSig_b_W_COPYDATASTRUCT", "BOOL (CWnd*, COPYDATASTRUCT*)"),
-    ("AfxSig_b_v_HELPINFO", "BOOL (LPHELPINFO)"),
-    ("AfxSig_CTLCOLOR", "HBRUSH (CDC*, CWnd*, UINT)"),
-    ("AfxSig_CTLCOLOR_REFLECT", "HBRUSH (CDC*, UINT)"),
-    ("AfxSig_i_u_W_u", "int (UINT, CWnd*, UINT)"),
-    ("AfxSig_i_uu_v", "int (UINT, UINT)"),
-    ("AfxSig_i_W_uu", "int (CWnd*, UINT, UINT)"),
-    ("AfxSig_i_v_s", "int (LPTSTR)"),
-    ("AfxSig_l_w_l", "LRESULT (WPARAM, LPARAM)"),
-    ("AfxSig_l_uu_M", "LRESULT (UINT, UINT, CMenu*)"),
-    ("AfxSig_v_b_h", "void (BOOL, HANDLE)"),
-    ("AfxSig_v_h_v", "void (HANDLE)"),
-    ("AfxSig_v_h_h", "void (HANDLE, HANDLE)"),
-    ("AfxSig_v_v_v", "void ()"),
-    ("AfxSig_v_u_v", "void (UINT)"),
-    ("AfxSig_v_u_u", "void (UINT, UINT)"),
-    ("AfxSig_v_uu_v", "void (UINT, UINT)"),
-    ("AfxSig_v_v_ii", "void (int, int)"),
-    ("AfxSig_v_u_uu", "void (UINT, UINT, UINT)"),
-    ("AfxSig_v_u_ii", "void (UINT, int, int)"),
-    ("AfxSig_v_u_W", "void (UINT, CWnd*)"),
-    ("AfxSig_i_u_v", "int (UINT)"),
-    ("AfxSig_u_u_v", "UINT (UINT)"),
-    ("AfxSig_b_v_v", "BOOL ()"),
-    ("AfxSig_v_w_l", "void (WPARAM, LPARAM)"),
-    ("AfxSig_MDIACTIVATE", "void (BOOL, CWnd*, CWnd*)"),
-    ("AfxSig_v_D_v", "void (CDC*)"),
-    ("AfxSig_v_M_v", "void (CMenu*)"),
-    ("AfxSig_v_M_ub", "void (CMenu*, UINT, BOOL)"),
-    ("AfxSig_v_W_v", "void (CWnd*)"),
-    ("AfxSig_v_v_W", "void (CWnd*)"),
-    ("AfxSig_v_W_uu", "void (CWnd*, UINT, UINT)"),
-    ("AfxSig_v_W_p", "void (CWnd*, CPoint)"),
-    ("AfxSig_v_W_h", "void (CWnd*, HANDLE)"),
-    ("AfxSig_C_v_v", "HCURSOR ()"),
-    ("AfxSig_ACTIVATE", "void (UINT, CWnd*, BOOL)"),
-    ("AfxSig_SCROLL", "void (UINT, UINT, CWnd*)"),
-    ("AfxSig_SCROLL_REFLECT", "void (UINT, UINT)"),
-    ("AfxSig_v_v_s", "void (LPTSTR)"),
-    ("AfxSig_v_u_cs", "void (UINT, LPCTSTR)"),
-    ("AfxSig_OWNERDRAW", "void (int, LPTSTR) force return TRUE"),
-    ("AfxSig_i_i_s", "int (int, LPTSTR)"),
-    ("AfxSig_u_v_p", "UINT (CPoint)"),
-    ("AfxSig_u_v_v", "UINT ()"),
-    ("AfxSig_v_b_NCCALCSIZEPARAMS", "void (BOOL, NCCALCSIZE_PARAMS*)"),
-    ("AfxSig_v_v_WINDOWPOS", "void (WINDOWPOS*)"),
-    ("AfxSig_v_uu_M", "void (UINT, UINT, HMENU)"),
-    ("AfxSig_v_u_p", "void (UINT, CPoint)"),
-    ("AfxSig_SIZING", "void (UINT, LPRECT)"),
-    ("AfxSig_MOUSEWHEEL", "BOOL (UINT, short, CPoint)"),
-    ("AfxSig_MOUSEHWHEEL", "void (UINT, short, CPoint)"),
-    ("AfxSigCmd_v", "void ()"),
-    ("AfxSigCmd_b", "BOOL ()"),
-    ("AfxSigCmd_RANGE", "void (UINT)"),
-    ("AfxSigCmd_EX", "BOOL (UINT)"),
-    ("AfxSigNotify_v", "void (NMHDR*, LRESULT*)"),
-    ("AfxSigNotify_b", "BOOL (NMHDR*, LRESULT*)"),
-    ("AfxSigNotify_RANGE", "void (UINT, NMHDR*, LRESULT*)"),
-    ("AfxSigNotify_EX", "BOOL (UINT, NMHDR*, LRESULT*)"),
-    ("AfxSigCmdUI", "void (CCmdUI*)"),
-    ("AfxSigCmdUI_RANGE", "void (CCmdUI*, UINT)"),
-    ("AfxSigCmd_v_pv", "void (void*)"),
-    ("AfxSigCmd_b_pv", "BOOL (void*)"),
-    ("AfxSig_l", "LRESULT ()"),
-    ("AfxSig_l_p", "LRESULT (CPOINT)"),
-    ("AfxSig_u_W_u", "UINT (CWnd*, UINT)"),
-    ("AfxSig_v_u_M", "void (UINT, CMenu* )"),
-    ("AfxSig_u_u_M", "UINT (UINT, CMenu* )"),
-    ("AfxSig_u_v_MENUGETOBJECTINFO", "UINT (MENUGETOBJECTINFO*)"),
-    ("AfxSig_v_M_u", "void (CMenu*, UINT)"),
-    ("AfxSig_v_u_LPMDINEXTMENU", "void (UINT, LPMDINEXTMENU)"),
-    ("AfxSig_APPCOMMAND", "void (CWnd*, UINT, UINT, UINT)"),
-    ("AfxSig_RAWINPUT", "void (UINT, HRAWINPUT)"),
-    ("AfxSig_u_u_u", "UINT (UINT, UINT)"),
-    ("AfxSig_MOUSE_XBUTTON", "void (UINT, UINT, CPoint)"),
-    ("AfxSig_MOUSE_NCXBUTTON", "void (short, UINT, CPoint)"),
-    ("AfxSig_INPUTLANGCHANGE", "void (BYTE, UINT)"),
-    ("AfxSig_v_u_hkl", "void (UINT, HKL)"),
-    ("AfxSig_INPUTDEVICECHANGE", "void (unsigned short)"),
+    ("AfxSig_b_D_v", "BOOL (AFX_MSG_CALL CCmdTarget::*pfn_b_D)(CDC*);"),
+    ("AfxSig_b_b_v", "BOOL (AFX_MSG_CALL CCmdTarget::*pfn_b_b)(BOOL);"),
+    ("AfxSig_b_u_v", "BOOL (AFX_MSG_CALL CCmdTarget::*pfn_b_u)(UINT);"),
+    ("AfxSig_b_h_v", "BOOL (AFX_MSG_CALL CCmdTarget::*pfn_b_h)(HANDLE);"),
+    ("AfxSig_b_W_uu", "BOOL (AFX_MSG_CALL CCmdTarget::*pfn_b_W_u_u)(CWnd*, UINT, UINT));"),
+    ("AfxSig_b_W_COPYDATASTRUCT", "BOOL (AFX_MSG_CALL CCmdTarget::*pfn_b_W_COPYDATASTRUCT)(CWnd*, COPYDATASTRUCT*);"),
+    ("AfxSig_b_v_HELPINFO", "BOOL (AFX_MSG_CALL CCmdTarget::*pfn_b_HELPINFO)(LPHELPINFO);"),
+    ("AfxSig_CTLCOLOR", "HBRUSH (AFX_MSG_CALL CCmdTarget::*pfn_B_D_W_u)(CDC*, CWnd*, UINT);"),
+    ("AfxSig_CTLCOLOR_REFLECT", "HBRUSH (AFX_MSG_CALL CCmdTarget::*pfn_B_D_u)(CDC*, UINT);"),
+    ("AfxSig_i_u_W_u", "int (AFX_MSG_CALL CCmdTarget::*pfn_i_u_W_u)(UINT, CWnd*, UINT);"),
+    ("AfxSig_i_uu_v", "int (AFX_MSG_CALL CCmdTarget::*pfn_i_u_u)(UINT, UINT);"),
+    ("AfxSig_i_W_uu", "int (AFX_MSG_CALL CCmdTarget::*pfn_i_W_u_u)(CWnd*, UINT, UINT);"),
+    ("AfxSig_i_v_s", "int (AFX_MSG_CALL CWnd::*pfn_i_s)(LPTSTR);"),
+    ("AfxSig_l_w_l", "LRESULT (AFX_MSG_CALL CWnd::*pfn_l_w_l)(WPARAM, LPARAM);"),
+    ("AfxSig_l_uu_M", "LRESULT (AFX_MSG_CALL CWnd::*pfn_l_u_u_M)(UINT, UINT, CMenu*);"),
+    ("AfxSig_v_b_h", "void (AFX_MSG_CALL CWnd::*pfn_v_b_h)(BOOL, HANDLE);"),
+    ("AfxSig_v_h_v", "void (AFX_MSG_CALL CWnd::*pfn_v_h)(HANDLE);"),
+    ("AfxSig_v_h_h", "void (AFX_MSG_CALL CWnd::*pfn_v_h_h)(HANDLE,HANDLE);"),
+    ("AfxSig_v_v_v", "void (AFX_MSG_CALL CWnd::*pfn_v_v)();"),
+    ("AfxSig_v_u_v", "void (AFX_MSG_CALL CWnd::*pfn_i_u)(UINT);"),
+    ("AfxSig_v_u_u", "void (AFX_MSG_CALL CWnd::*pfn_v_u)(UINT);"),
+    ("AfxSig_v_uu_v", "void (AFX_MSG_CALL CWnd::*pfn_v_u_u)(UINT, UINT);"),
+    ("AfxSig_v_v_ii", "void (AFX_MSG_CALL CWnd::*pfn_v_i_i)(int, int);"),
+    ("AfxSig_v_u_uu", "void (AFX_MSG_CALL CWnd::*pfn_v_u_u_u)(UINT, UINT, UINT);"),
+    ("AfxSig_v_u_ii", "void (AFX_MSG_CALL CWnd::*pfn_v_u_i_i)(UINT, int, int);"),
+    ("AfxSig_v_u_W", "void (AFX_MSG_CALL CWnd::*pfn_v_u_W)(UINT, CWnd*);"),
+    ("AfxSig_i_u_v", "int (AFX_MSG_CALL CWnd::*pfn_i_u)(UINT);"),
+    ("AfxSig_u_u_v", "UINT (AFX_MSG_CALL CWnd::*pfn_u_u)(UINT);"),
+    ("AfxSig_b_v_v", "BOOL (AFX_MSG_CALL CWnd::*pfn_b_v)();"),
+    ("AfxSig_v_w_l", "void (AFX_MSG_CALL CWnd::*pfn_v_w_l)(WPARAM, LPARAM);"),
+    ("AfxSig_MDIACTIVATE", "void (AFX_MSG_CALL CWnd::*pfn_v_b_W_W)(BOOL, CWnd*, CWnd*);"),
+    ("AfxSig_v_D_v", "void (AFX_MSG_CALL CWnd::*pfn_v_D)(CDC*);"),
+    ("AfxSig_v_M_v", "void (AFX_MSG_CALL CWnd::*pfn_v_M)(CMenu*);"),
+    ("AfxSig_v_M_ub", "void (AFX_MSG_CALL CWnd::*pfn_v_M_u_b)(CMenu*, UINT, BOOL);"),
+    ("AfxSig_v_W_v", "void (AFX_MSG_CALL CWnd::*pfn_v_W)(CWnd*);"),
+    ("AfxSig_v_v_W", "void (AFX_MSG_CALL CWnd::*pfn_v_W)(CWnd*);"),
+    ("AfxSig_v_W_uu", "void (AFX_MSG_CALL CWnd::*pfn_v_W_u_u)(CWnd*, UINT, UINT);"),
+    ("AfxSig_v_W_p", "void (AFX_MSG_CALL CWnd::*pfn_v_W_p)(CWnd*, CPoint);"),
+    ("AfxSig_v_W_h", "void (AFX_MSG_CALL CWnd::*pfn_v_W_h)(CWnd*, HANDLE);"),
+    ("AfxSig_C_v_v", "HCURSOR (AFX_MSG_CALL CWnd::*pfn_C_v)();"),
+    ("AfxSig_ACTIVATE", "	void (AFX_MSG_CALL CWnd::*pfn_v_u_W_b)(UINT, CWnd*, BOOL);"),
+    ("AfxSig_SCROLL", "void (AFX_MSG_CALL CWnd::*pfn_v_u_u_W)(UINT, UINT, CWnd*);"),
+    ("AfxSig_SCROLL_REFLECT", "void (AFX_MSG_CALL CWnd::*pfn_v_u_u)(UINT, UINT);"),
+    ("AfxSig_v_v_s", "void (AFX_MSG_CALL CWnd::*pfn_v_s)(LPTSTR);"),
+    ("AfxSig_v_u_cs", "void (AFX_MSG_CALL CWnd::*pfn_v_u_cs)(UINT, LPCTSTR);"),
+    ("AfxSig_OWNERDRAW", "void (AFX_MSG_CALL CWnd::*pfn_v_i_s)(int, LPTSTR);"),
+    ("AfxSig_i_i_s", "int (AFX_MSG_CALL CWnd::*pfn_i_i_s)(int, LPTSTR)"),
+    ("AfxSig_u_v_p", "UINT (AFX_MSG_CALL CWnd::*pfn_u_p)(CPoint);"),
+    ("AfxSig_u_v_v", "UINT (AFX_MSG_CALL CWnd::*pfn_u_v)();"),
+    ("AfxSig_v_b_NCCALCSIZEPARAMS", "void (AFX_MSG_CALL CWnd::*pfn_v_b_NCCALCSIZEPARAMS)(BOOL, NCCALCSIZE_PARAMS*);"),
+    ("AfxSig_v_v_WINDOWPOS", "void (AFX_MSG_CALL CWnd::*pfn_v_v_WINDOWPOS)(WINDOWPOS*);"),
+    ("AfxSig_v_uu_M", "void (AFX_MSG_CALL CWnd::*pfn_v_u_u_M)(UINT, UINT, HMENU);"),
+    ("AfxSig_v_u_p", "void (AFX_MSG_CALL CWnd::*pfn_v_u_p)(UINT, CPoint);"),
+    ("AfxSig_SIZING", "void (AFX_MSG_CALL CWnd::*pfn_v_u_pr)(UINT, LPRECT);"),
+    ("AfxSig_MOUSEWHEEL", "BOOL (AFX_MSG_CALL CWnd::*pfn_b_u_s_p)(UINT, short, CPoint);"),
+    ("AfxSig_MOUSEHWHEEL", "void (AFX_MSG_CALL CWnd::*pfn_MOUSEHWHEEL)(UINT, short, CPoint);"),
+    ("AfxSigCmd_v", "void (AFX_MSG_CALL CCmdTarget::*pfnCmd_v_v)();"),
+    ("AfxSigCmd_b", "BOOL (AFX_MSG_CALL CCmdTarget::*pfnCmd_b_v)();"),
+    ("AfxSigCmd_RANGE", "void (AFX_MSG_CALL CCmdTarget::*pfnCmd_v_u)(UINT);"),
+    ("AfxSigCmd_EX", "BOOL (AFX_MSG_CALL CCmdTarget::*pfnCmd_b_u)(UINT);"),
+    ("AfxSigNotify_v", "void (AFX_MSG_CALL CCmdTarget::*pfnNotify_v_NMHDR_pl)(NMHDR*, LRESULT*);"),
+    ("AfxSigNotify_b", "BOOL (AFX_MSG_CALL CCmdTarget::*pfnNotify_b_NMHDR_pl)(NMHDR*, LRESULT*);"),
+    ("AfxSigNotify_RANGE", "void (AFX_MSG_CALL CCmdTarget::*pfnNotify_v_u_NMHDR_pl)(UINT, NMHDR*, LRESULT*);"),
+    ("AfxSigNotify_EX", "BOOL (AFX_MSG_CALL CCmdTarget::*pfnNotify_b_u_NMHDR_pl)(UINT, NMHDR*, LRESULT*);"),
+    ("AfxSigCmdUI", "void (AFX_MSG_CALL CCmdTarget::*pfnCmdUI_v_C)(CCmdUI*);"),
+    ("AfxSigCmdUI_RANGE", "void (AFX_MSG_CALL CCmdTarget::*pfnCmdUI_v_C_u)(CCmdUI*, UINT);"),
+    ("AfxSigCmd_v_pv", "void (AFX_MSG_CALL CCmdTarget::*pfnCmd_v_pv)(void*)"),
+    ("AfxSigCmd_b_pv", "BOOL (AFX_MSG_CALL CCmdTarget::*pfnCmd_b_pv)(void*)"),
+    ("AfxSig_l", "LRESULT (AFX_MSG_CALL CWnd::*pfn_l_v)();"),
+    ("AfxSig_l_p", "LRESULT (AFX_MSG_CALL CWnd::*pfn_l_p)(CPoint);"),
+    ("AfxSig_u_W_u", "UINT (AFX_MSG_CALL CWnd::*pfn_u_W_u)(CWnd*, UINT);"),
+    ("AfxSig_v_u_M", "void (AFX_MSG_CALL CWnd::*pfn_v_u_M)(UINT, CMenu*);"),
+    ("AfxSig_u_u_M", "UINT (AFX_MSG_CALL CWnd::*pfn_u_u_M)(UINT, CMenu*);"),
+    ("AfxSig_u_v_MENUGETOBJECTINFO", "UINT (AFX_MSG_CALL CWnd::*pfn_u_v_MENUGETOBJECTINFO)(MENUGETOBJECTINFO*);"),
+    ("AfxSig_v_M_u", "void (AFX_MSG_CALL CWnd::*pfn_v_M_u)(CMenu*, UINT);"),
+    ("AfxSig_v_u_LPMDINEXTMENU", "void (AFX_MSG_CALL CWnd::*pfn_v_u_LPMDINEXTMENU)(UINT, LPMDINEXTMENU);"),
+    ("AfxSig_APPCOMMAND", "void (AFX_MSG_CALL CWnd::*pfn_APPCOMMAND)(CWnd*, UINT, UINT, UINT);"),
+    ("AfxSig_RAWINPUT", "BOOL (AFX_MSG_CALL CWnd::*pfn_RAWINPUT)(UINT, HRAWINPUT);"),
+    ("AfxSig_u_u_u", "UINT (AFX_MSG_CALL CWnd::*pfn_u_u_u)(UINT, UINT);"),
+    ("AfxSig_MOUSE_XBUTTON", "void (AFX_MSG_CALL CWnd::*pfn_MOUSE_XBUTTON)(UINT, UINT, CPoint);"),
+    ("AfxSig_MOUSE_NCXBUTTON", "void (AFX_MSG_CALL CWnd::*pfn_MOUSE_NCXBUTTON)(short, UINT, CPoint);"),
+    ("AfxSig_INPUTLANGCHANGE", "void (AFX_MSG_CALL CWnd::*pfn_INPUTLANGCHANGE)(BYTE, UINT);"),
+    ("AfxSig_v_u_hkl", "BOOL (AFX_MSG_CALL CWnd::*pfn_v_u_h)(UINT, HANDLE);"),
+    ("AfxSig_INPUTDEVICECHANGE", "void (AFX_MSG_CALL CWnd::*pfn_INPUTDEVICECHANGE)(unsigned short);"),
 ]
 
 IS64 = idc.__EA64__
@@ -1712,6 +1715,18 @@ class Utils(object):
         if eid == idc.BADADDR:
             eid = idc.add_enum(idc.BADADDR, name, flags)
         return eid
+
+    @staticmethod
+    def is_mem_zero(ea, size):
+        if ea == idc.BADADDR:
+            return -1
+        buf = idc.get_bytes(ea, size)
+        if buf is None:
+            return -1
+        for b in buf:
+            if b != 0:
+                return 0
+        return 1
 
 class AFXMSGMAPSearchResultChooser(idaapi.Choose):
     def __init__(self, title, items, flags=0, width=None, height=None, embedded=False):
@@ -1923,7 +1938,7 @@ class AFXStructs(object):
         idc.SetType(idc.get_member_id(sid, 0), "ATL::IAtlStringMgr *") # m_pNextClass
 
         sid = Utils.force_add_struct("ATL::CNilStringData")
-        idc.add_struc_member(sid, "baseclass", 0, 0, idc.FF_DATA | idc.FF_STRUCT,
+        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT,
                              idc.get_struc_id("ATL::CStringData"), self.ptrSize + 3 * 4)
         idc.add_struc_member(sid, "achNil", -1, idc.FF_DATA | idc.FF_WORD, -1, 4)
 
@@ -1975,36 +1990,27 @@ class AFXStructs(object):
             ret.append("WM_UNKNOWN_0x%X" % mid)
         return ret
 
-    def Check_MSG_ENTRY(self, entry):
-        if entry == idc.BADADDR:
-            return 0
-        # Check nID
-        if idc.get_wide_dword(entry + 8) > 0xFFFF:
-            return 0
-        # Check nLastID
-        if idc.get_wide_dword(entry + 12) > 0xFFFF:
-            return 0
-        Sig = self.getAword(entry + 16)
-        if Sig > len(AfxSig) + 20:  # + 20 for future MFC new AfxSig
-            if not self.min_ea < Sig < self.max_ea:  # point message
-                return 0
-
-        return 1
-
     @staticmethod
-    def getAword(addr, offset=0):
+    def get_DWORD_PTR(addr, offset=0):
         return idaapi.get_qword(addr + offset * 8) if IS64 else idc.get_wide_dword(addr + offset * 4)
 
     @staticmethod
     def get_pfn(addr):
         return idaapi.get_qword(addr + 24) if IS64 else idc.get_wide_dword(addr + 20)
 
+    @staticmethod
+    def MakeOffset(addr):
+        if IS64:
+            idc.create_data(addr, idc.FF_0OFF | idc.FF_REF | idc.FF_QWORD, 8, idc.BADADDR)
+        else:
+            idc.create_data(addr, idc.FF_0OFF | idc.FF_REF | idc.FF_DWORD, 4, idc.BADADDR)
+
     def Check_MSGMAP(self, addr, seg_start_ea, seg_end_ea):
-        pBaseMap = self.getAword(addr, 0)
+        pBaseMap = self.get_DWORD_PTR(addr, 0)
         if not seg_start_ea < pBaseMap < seg_end_ea:
             return 0
 
-        lpEntries = self.getAword(addr, 1)
+        lpEntries = self.get_DWORD_PTR(addr, 1)
         if not seg_start_ea < lpEntries < seg_end_ea:
             return 0
 
@@ -2015,7 +2021,7 @@ class AFXStructs(object):
             (idc.get_wide_dword(lpEntries + 4) != 0 or
              idc.get_wide_dword(lpEntries + 8) != 0 or
              idc.get_wide_dword(lpEntries + 12) != 0 or
-             self.getAword(lpEntries + 16) != 0 or
+             self.get_DWORD_PTR(lpEntries + 16) != 0 or
              self.get_pfn(lpEntries) != 0):
             return 0
 
@@ -2032,7 +2038,7 @@ class AFXStructs(object):
                 idc.get_wide_dword(lpEntries + 4) == 0 and \
                 idc.get_wide_dword(lpEntries + 8) == 0 and \
                 idc.get_wide_dword(lpEntries + 12) == 0 and \
-                self.getAword(lpEntries + 16) == 0 and \
+                self.get_DWORD_PTR(lpEntries + 16) == 0 and \
                 self.get_pfn(lpEntries) == 0:
                 return 1
 
@@ -2047,17 +2053,30 @@ class AFXStructs(object):
 
         return 0
 
-    @staticmethod
-    def MakeOffset(addr):
-        if IS64:
-            idc.create_data(addr, idc.FF_0OFF | idc.FF_REF | idc.FF_QWORD, 8, idc.BADADDR)
-        else:
-            idc.create_data(addr, idc.FF_0OFF | idc.FF_REF | idc.FF_DWORD, 4, idc.BADADDR)
+    def Check_MSG_ENTRY(self, entry):
+        if entry == idc.BADADDR:
+            return 0
+        # Check nMessage
+        if idc.get_wide_dword(entry) > 0xFFFF:
+            return 0
+        # Check nID
+        if idc.get_wide_dword(entry + 8) > 0xFFFF:
+            return 0
+        # Check nLastID
+        if idc.get_wide_dword(entry + 12) > 0xFFFF:
+            return 0
+        # Check nSig
+        nSig = self.get_DWORD_PTR(entry + 16)
+        if nSig > len(AfxSig) + 20:  # + 20 for future MFC new AfxSig
+            if not self.min_ea < nSig < self.max_ea:  # point message
+                return 0
+
+        return 1
 
     def Make_MSG_ENTRY(self, addr):
         msgmapSize = 0
-        pBaseMap = self.getAword(addr, 0)
-        lpEntries = self.getAword(addr, 1)
+        pBaseMap = self.get_DWORD_PTR(addr, 0)
+        lpEntries = self.get_DWORD_PTR(addr, 1)
 
         idc.create_struct(addr, -1, S_MSGMAP)
         if idc.get_name(addr) in ("off_%lX" % addr, ""):
@@ -2073,7 +2092,7 @@ class AFXStructs(object):
             msgNames = self.GetMsgName(idc.get_wide_dword(pEntry + 0))
             for msgName in msgNames:
                 str_funcmt = "MSG function: " + msgName + "\n"
-            str_funcmt += "    nMessage: " + ("0x%LX" % idc.get_wide_dword(pEntry + 0)) + "\n"
+            str_funcmt += "    nMessage: " + ("0x%X" % idc.get_wide_dword(pEntry + 0)) + "\n"
             str_funcmt += "       nCode: " + str(idc.get_wide_dword(pEntry + 4)) + "\n"
             str_funcmt += "         nID: " + str(idc.get_wide_dword(pEntry + 8)) + " - " + str(idc.get_wide_dword(pEntry + 12))
 
@@ -2165,11 +2184,18 @@ class AFXStructs(object):
             c.show()
         print("===== Search complete, total %lu, new resolution %lu=====\n" % (totalCount, parseCount))
 
+    def Search_CRuntimeClasses(self):
+        # TODO: viet cho xong
+        pass
+
+    def Make_CRuntimeClass(self):
+        # TODO: viet cho xong
+        pass
 
 class MenuContextHandler(idaapi.action_handler_t):
     @classmethod
     def get_name(cls):
-        return "AFX_MSGMAP:" + cls.__name__
+        return "MFCParser:" + cls.__name__
 
     @classmethod
     def get_label(cls):
@@ -2202,39 +2228,50 @@ class MenuContextHandler(idaapi.action_handler_t):
     def update(cls, ctx):
         return idaapi.AST_ENABLE_FOR_FORM if ctx.form_type == idaapi.BWN_DISASM else idaapi.AST_DISABLE_FOR_FORM
 
-
-# context menu for Patcher
-class Make_MSGMAP_MC_Handler(MenuContextHandler):
+# Context menu for make MSGMAP
+class Make_MSGMAP_MCH(MenuContextHandler):
     def activate(self, ctx):
         self.plugin.make_msgmap()
         return 1
 
-
-# context menu for Fill Range
-class Find_MSGMAP_MC_Handler(MenuContextHandler):
+# Context menu for Search MSGMAP
+class Search_MSGMAP_MCH(MenuContextHandler):
     def activate(self, ctx):
         self.plugin.search_msgmap()
         return 1
 
+# Context menu for make CRuntimeClass
+class Make_CRuntimeClass_MCH(MenuContextHandler):
+    def activate(self, ctx):
+        self.plugin.make_CRuntimeClass()
+        return 1
+
+# Context menu for search CRuntimeClasses
+class Search_CRuntimeClass_MCH(MenuContextHandler):
+    def activate(self, ctx):
+        self.plugin.search_CRuntimeClass()
+        return 1
 
 # hooks for popup menu
 class Hooks(idaapi.UI_Hooks):
     # IDA >= 700 right click widget popup
     def finish_populating_widget_popup(self, widget, popup):
         if idaapi.get_widget_type(widget) == idaapi.BWN_DISASM:
-            idaapi.attach_action_to_popup(widget, popup, Make_MSGMAP_MC_Handler.get_name(), POPUP_PATH)
-            idaapi.attach_action_to_popup(widget, popup, Find_MSGMAP_MC_Handler.get_name(), POPUP_PATH)
+            idaapi.attach_action_to_popup(widget, popup, Make_MSGMAP_MCH.get_name(), POPUP_PATH)
+            idaapi.attach_action_to_popup(widget, popup, Search_MSGMAP_MCH.get_name(), POPUP_PATH)
+            idaapi.attach_action_to_popup(widget, popup, Make_CRuntimeClass_MCH.get_name(), POPUP_PATH)
+            idaapi.attach_action_to_popup(widget, popup, Search_CRuntimeClass_MCH.get_name(), POPUP_PATH)
 
 
-class AfxMsgMapPlugin_t(idaapi.plugin_t):
+class AfxParserPlugin_t(idaapi.plugin_t):
     flags = 0
-    comment = "AFX_MSGMAP"
+    comment = "AFX_Parser"
     help = ""
-    wanted_name = "AFX_MSGMAP"
+    wanted_name = "AFX_Parser"
     wanted_hotkey = ""
 
     def __init__(self):
-        self.afxmsgmap = AFXStructs()
+        self.afxStructs = AFXStructs()
         self.hooks = None
 
     def init(self):
@@ -2242,32 +2279,36 @@ class AfxMsgMapPlugin_t(idaapi.plugin_t):
 
         if ret >= -1:
             # Alwarys add WM_MESSAGE
-            self.afxmsgmap.add_WM_MESSAGES_enum()
+            self.afxStructs.add_WM_MESSAGES_enum()
 
         if ret != 1:
             print("[%s] Not used MFC. Plugin skip" % self.wanted_name)
             return idaapi.PLUGIN_SKIP
 
-        self.afxmsgmap.add_AFX_enums()  # should call before add_AFX_structs
-        self.afxmsgmap.add_AFX_structs()
+        self.afxStructs.add_AFX_enums()  # should call before add AFX_xxx structs
+        self.afxStructs.add_AFX_structs()
 
         # register popup menu handlers
-        Make_MSGMAP_MC_Handler.register(self, "Make as AFX_MSGMAP")
-        Find_MSGMAP_MC_Handler.register(self, "Search AFX_MSGMAP")
+        Make_MSGMAP_MCH.register(self, "Make as AFX_MSGMAP")
+        Search_MSGMAP_MCH.register(self, "Search AFX_MSGMAPs")
+        Make_CRuntimeClass_MCH.register(self, "Make as CRuntimeClass")
+        Search_CRuntimeClass_MCH.register(self, "Search CRuntimeClasses")
 
-        idaapi.attach_action_to_menu(MENU_PATH, Make_MSGMAP_MC_Handler.get_name(), idaapi.SETMENU_APP)
-        idaapi.attach_action_to_menu(MENU_PATH, Find_MSGMAP_MC_Handler.get_name(), idaapi.SETMENU_APP)
+        idaapi.attach_action_to_menu(MENU_PATH, Make_MSGMAP_MCH.get_name(), idaapi.SETMENU_APP)
+        idaapi.attach_action_to_menu(MENU_PATH, Search_MSGMAP_MCH.get_name(), idaapi.SETMENU_APP)
+        idaapi.attach_action_to_menu(MENU_PATH, Make_CRuntimeClass_MCH.get_name(), idaapi.SETMENU_APP)
+        idaapi.attach_action_to_menu(MENU_PATH, Search_CRuntimeClass_MCH.get_name(), idaapi.SETMENU_APP)
 
         # setup popup menu
         self.hooks = Hooks()
         self.hooks.hook()
 
         addon = idaapi.addon_info_t()
-        addon.id = "snow.afxmsgmap"
-        addon.name = "AfxMSGMap"
+        addon.id = "HTC::AFX_Parser"
+        addon.name = "AFX_Parser"
         addon.producer = "Snow & HTC - VinCSS (a member of Vingroup)"
         addon.url = ""
-        addon.version = "7.00"
+        addon.version = "7.x"
         idaapi.register_addon(addon)
 
         print("[%s] plugin installed - Written by snow<85703533> & HTC" % self.wanted_name)
@@ -2282,28 +2323,35 @@ class AfxMsgMapPlugin_t(idaapi.plugin_t):
             self.hooks.unhook()
             self.hooks = None
 
-        idaapi.detach_action_from_menu(MENU_PATH, Find_MSGMAP_MC_Handler.get_name())
-        idaapi.detach_action_from_menu(MENU_PATH, Make_MSGMAP_MC_Handler.get_name())
+        idaapi.detach_action_from_menu(MENU_PATH, Search_CRuntimeClass_MCH.get_name())
+        idaapi.detach_action_from_menu(MENU_PATH, Make_CRuntimeClass_MCH.get_name())
+        idaapi.detach_action_from_menu(MENU_PATH, Search_MSGMAP_MCH.get_name())
+        idaapi.detach_action_from_menu(MENU_PATH, Make_MSGMAP_MCH.get_name())
 
-        Find_MSGMAP_MC_Handler.unregister()
-        Make_MSGMAP_MC_Handler.unregister()
+        Search_CRuntimeClass_MCH.unregister()
+        Make_CRuntimeClass_MCH.unregister()
+        Search_MSGMAP_MCH.unregister()
+        Make_MSGMAP_MCH.unregister()
 
         print("[%s] plugin terminated." % self.wanted_name)
 
-    # null handler
+    # make AFX_MSGMAP at current screen ea
     def make_msgmap(self):
         ea = idc.get_screen_ea()
         seg_start = idc.get_segm_start(ea)
         seg_end = idc.get_segm_end(ea)
-        if self.afxmsgmap.Check_MSGMAP(ea, seg_start, seg_end) > 0:
-            self.afxmsgmap.Make_MSG_ENTRY(ea)
+        if self.afxStructs.Check_MSGMAP(ea, seg_start, seg_end) > 0:
+            self.afxStructs.Make_MSG_ENTRY(ea)
         else:
             print("This is not a AFX_MSGMAP\n")
 
-    # handler for About menu
+    # search all AFX_MSGMAP in a user selected section
     def search_msgmap(self):
-        self.afxmsgmap.Search_MSGMAP()
+        self.afxStructs.Search_MSGMAP()
 
+    # make CRuntimeClass and recusive to all parent and next CRuntimeClass
+    def make_CRuntimeClass(self):
+        self.afxStructs.Make_CRuntimeClass()
 
 def PLUGIN_ENTRY():
-    return AfxMsgMapPlugin_t()
+    return AfxParserPlugin_t()
