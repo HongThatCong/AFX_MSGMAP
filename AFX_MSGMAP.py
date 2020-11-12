@@ -20,6 +20,8 @@ import ida_moves
 
 # Constants
 
+PLUGIN_NAME = "MFC_Helper"
+
 WM_USER = 0x400
 WM_APP = 0x8000
 
@@ -1652,8 +1654,8 @@ S_CRTC_GetBaseClass = "?_GetBaseClass@%s@@KAPEAUCRuntimeClass@@XZ"
 # public: static class CObject * 'CClassName'::CreateObject(void)
 S_CRTC_CreateObject = "?CreateObject@%s@@SAPEAVCObject@@XZ"
 
-MENU_PATH = "Search/AFX_MSGMAP/"
-POPUP_PATH = "AFX_MSGMAP/"
+MENU_PATH = "Search/%s/" % PLUGIN_NAME
+POPUP_PATH = "%s/" % PLUGIN_NAME
 
 # Utility functions
 
@@ -1678,7 +1680,7 @@ class Utils(object):
             # Not a PE, COFF hay LIB binary
             return -2
 
-        compiler = idc.get_inf_attr(idc.INF_COMPILER)
+        compiler = idaapi.get_inf_structure().cc.id
         if compiler & idc.COMP_MASK != idc.COMP_MS:
             # Not a Visual C++ binary
             return -1
@@ -1880,8 +1882,8 @@ class AFXStructs(object):
 
         # AFX_EVENTSINKMAPs
         sid = Utils.force_add_struct(S_EVENTSINKMAP_ENTRY)
-        idc.add_struc_member(sid, "dispEntry", 0, idc.FF_DATA | idc.FF_STRUCT,
-                             idc.get_struc_id(S_DISPMAP_ENTRY), 8 * self.ptrSize)
+        sub_sid = idc.get_struc_id(S_DISPMAP_ENTRY)
+        idc.add_struc_member(sid, "dispEntry", 0, idc.FF_DATA | idc.FF_STRUCT, sub_sid, idc.get_struc_size(sub_sid))
         idc.add_struc_member(sid, "nCtrlIDFirst", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
         idc.add_struc_member(sid, "nCtrlIDLast", -1, idc.FF_DATA | idc.FF_DWORD, -1, 4)
 
@@ -1922,8 +1924,8 @@ class AFXStructs(object):
         # CRuntimeClass_v7
         # HTC - add m_pClassInit field, it is the last field in CRuntimeClass in MFC >= v7
         sid = Utils.force_add_struct(S_CRuntimeClass_v7)
-        idc.add_struc_member(sid, "CRuntimeClass", 0, idc.FF_DATA | idc.FF_STRUCT,
-                             idc.get_struc_id(S_CRuntimeClass), 5 * self.ptrSize)
+        sub_sid = idc.get_struc_id(S_CRuntimeClass)
+        idc.add_struc_member(sid, "CRuntimeClass", 0, idc.FF_DATA | idc.FF_STRUCT, sub_sid, idc.get_struc_size(sub_sid))
         idc.add_struc_member(sid, "m_pClassInit", -1, ptrFlag, -1, self.ptrSize, reftype=rt)
 
         # Some internal CStrings class in ATL/MFC
@@ -1938,22 +1940,22 @@ class AFXStructs(object):
         idc.SetType(idc.get_member_id(sid, 0), "ATL::IAtlStringMgr *") # m_pNextClass
 
         sid = Utils.force_add_struct("ATL::CNilStringData")
-        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT,
-                             idc.get_struc_id("ATL::CStringData"), self.ptrSize + 3 * 4)
+        sub_sid = idc.get_struc_id("ATL::CStringData")
+        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT, sub_sid, idc.get_struc_size(sub_sid))
         idc.add_struc_member(sid, "achNil", -1, idc.FF_DATA | idc.FF_WORD, -1, 4)
 
         sid = Utils.force_add_struct("CAfxStringMgr")
-        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT,
-                             idc.get_struc_id("ATL::IAtlStringMgr"), self.ptrSize)
-        idc.add_struc_member(sid, "m_nil", -1, idc.FF_DATA | idc.FF_STRUCT,
-                             idc.get_struc_id("ATL::CNilStringData"), self.ptrSize + 4 * 4)
+        sub_sid = idc.get_struc_id("ATL::IAtlStringMgr")
+        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT, sub_sid, idc.get_struc_size(sub_sid))
+        sub_sid = idc.get_struc_id("ATL::CNilStringData")
+        idc.add_struc_member(sid, "m_nil", -1, idc.FF_DATA | idc.FF_STRUCT, sub_sid, idc.get_struc_size(sub_sid))
 
         sid = Utils.force_add_struct("ATL::CSimpleString")
         idc.add_struc_member(sid, "m_pszData", 0, ptrFlag, -1, self.ptrSize, reftype=rt)
 
         sid = Utils.force_add_struct("ATL::CString")
-        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT,
-                             idc.get_struc_id("ATL::CSimpleString"), self.ptrSize)
+        sub_sid = idc.get_struc_id("ATL::CSimpleString")
+        idc.add_struc_member(sid, "baseclass", 0, idc.FF_DATA | idc.FF_STRUCT, sub_sid, idc.get_struc_size(sub_sid))
 
         return True
 
@@ -2184,7 +2186,7 @@ class AFXStructs(object):
             c.show()
         print("===== Search complete, total %lu, new resolution %lu=====\n" % (totalCount, parseCount))
 
-    def Search_CRuntimeClasses(self):
+    def Search_CRuntimeClass(self):
         # TODO: viet cho xong
         pass
 
@@ -2263,11 +2265,11 @@ class Hooks(idaapi.UI_Hooks):
             idaapi.attach_action_to_popup(widget, popup, Search_CRuntimeClass_MCH.get_name(), POPUP_PATH)
 
 
-class AfxParserPlugin_t(idaapi.plugin_t):
+class MFCHelperPlugin_t(idaapi.plugin_t):
     flags = 0
-    comment = "AFX_Parser"
+    comment = PLUGIN_NAME
     help = ""
-    wanted_name = "AFX_Parser"
+    wanted_name = PLUGIN_NAME
     wanted_hotkey = ""
 
     def __init__(self):
@@ -2304,9 +2306,9 @@ class AfxParserPlugin_t(idaapi.plugin_t):
         self.hooks.hook()
 
         addon = idaapi.addon_info_t()
-        addon.id = "HTC::AFX_Parser"
-        addon.name = "AFX_Parser"
-        addon.producer = "Snow & HTC - VinCSS (a member of Vingroup)"
+        addon.id = "bangchucaibang.htc@gmail.com"
+        addon.name = PLUGIN_NAME
+        addon.producer = "Snow & HTC"
         addon.url = ""
         addon.version = "7.x"
         idaapi.register_addon(addon)
@@ -2353,5 +2355,9 @@ class AfxParserPlugin_t(idaapi.plugin_t):
     def make_CRuntimeClass(self):
         self.afxStructs.Make_CRuntimeClass()
 
+    def search_CRuntimeClass(self):
+        self.afxStructs.Search_CRuntimeClass()
+
+
 def PLUGIN_ENTRY():
-    return AfxParserPlugin_t()
+    return MFCHelperPlugin_t()
